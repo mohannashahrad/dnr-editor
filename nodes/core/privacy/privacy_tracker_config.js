@@ -21,20 +21,44 @@ module.exports = function(RED) {
             var labellerFileName = node.labellerFileName;
             var labellers = node.labellers;
 
-            // Perform desired operations based on the configuration
-            // For example, you can log the configuration to the console
-            console.log('Policy File Name Type:', fileNameType);
-            console.log('Policy File Name:', policyFileName);
             console.log('Rules:', rules);
-
-            console.log('Labeller File Name Type:', labellerFileType);
-            console.log('Labeller File Name:', labellerFileName);
             console.log('Label Injectors:', labellers);
 
-            // Send the modified message along
+            // Initializing the tracker node
+            const tracker = node.context().global.get("Tracker");
+            var labeller_dict = {};
+            var rules_list = [];
+
+            labellers.forEach(item => {
+                var paramMatch = item.func.match(/^\s*([^(]*)\s*=>/);
+                var param = paramMatch ? paramMatch[1].trim() : null;
+                labeller_dict[item.label] = eval('(function('+ param +') { return ' + item.func + '; })()');
+
+            });
+
+            // This is just the read/access rules 
+            rules.forEach(item => {
+                if (item.action === 'allow') {
+                    rules_list.push(item.sink + ' <- ' + item.source);
+                } else {
+                    rules_list.push(item.sink + ' </- ' + item.source);
+                }
+            });
+
+            // configure tracker object
+            tracker.configure({
+                labellers: labeller_dict,
+                rules: rules_list
+            })
+
+            // Setting tracker as a flow context
+            node.context().flow.set('tracker', tracker);
+            
+            msg.tracker = tracker;
             node.send(msg);
         });
     }
 
     RED.nodes.registerType('tracker-config', TrackerConfig);
 };
+
