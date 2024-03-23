@@ -24,6 +24,7 @@ var flowUtil = require("./util");
 var nodeCloseTimeout = 15000;
 
 function Flow(global,flow) {
+    console.log('%c***************** In function Flow ***************** ', 'color:green');
     if (typeof flow === 'undefined') {
         flow = global;
     }
@@ -299,6 +300,7 @@ function Flow(global,flow) {
 }
 
 function createNode(type,config) {
+    console.log("***************** In function createNode ***************** ");
     var nn = null;
     var nt = typeRegistry.get(type);
     if (nt) {
@@ -500,7 +502,6 @@ function createSubflow(sf,sfn,subflows,globalSubflows,activeNodes) {
     });
     return nodes;
 }
-
 
 module.exports = {
     init: function(settings) {

@@ -85,3 +85,12 @@ It was created by [IBM Emerging Technology](https://www.ibm.com/blogs/emerging-t
 DNR Editor is an extension of Node-RED inspired by Mike Blackstock [@mblackstock](http://twitter.com/mblackstock) and created by Nam Giang <kyng@ece.ubc.ca>
 
 This is a research project funded by NSERC that aims at designing a distributed application platform for the Internet of Things and Fog Computing.
+
+## Set-up Notes [Mohanna Added]
+
+To follow the Github installation process (git clone, npm install, grunt build, and start by "node red -s settings.js"), I am using the following: 
+* Node v10.12.0
+* npm v6.4.1
+* Python 2.7.18
+* node-gyp@3.8.0 and fibers@2.0.2
+

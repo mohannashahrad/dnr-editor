@@ -1177,7 +1177,10 @@ RED.nodes = (function() {
         }
 
         RED.workspaces.refresh();
-        RED.dnr.loadConstraints(new_nodes);
+        RED.dnr.loadConstraints(new_nodes)
+        console.log("In nodes.js, after loading constraints");
+        RED.dnr.loadPrivacyConstraints(new_nodes);
+        console.log("In nodes.js, after loading policies");
         return [new_nodes,new_links,new_workspaces,new_subflows,missingWorkspace];
     }
 

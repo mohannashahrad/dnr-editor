@@ -157,7 +157,11 @@ function processDnrSyncRequest(dnrSyncReq){
   }
 
   let dnrLinks = dnrSyncReq.dnrLinks
+  // console.log("***** Mohanna Added this for the dnrLinks ******");
+  // console.log(dnrLinks);
   let contributingNodes = dnrSyncReq.contributingNodes
+  // console.log(contributingNodes);
+  // console.log("*********");
   
   activeDevices[deviceId].contributingNodes = contributingNodes
 
@@ -356,6 +360,7 @@ function start(){
 
     ws.on('message', function(data,flags) {
       console.log(data)
+      console.log("***************** Mohanna added this *****************");
       if (ws.readyState != 1){
         return
       }
@@ -368,6 +373,7 @@ function start(){
         return;
       }
 
+      // Here is for registering the device on the editor side
       if (msg.topic === TOPIC_REGISTER){
         device = getUniqueId()
         registerDevice(device, ws, msg)
@@ -377,6 +383,7 @@ function start(){
         }))
       }
 
+      // This is a heartbeat message coming from the device
       if (msg.topic === TOPIC_DNR_HB){
         device = msg.deviceId
         // request for reregistering this device

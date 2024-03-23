@@ -328,7 +328,8 @@
             "social": "social",
             "storage": "storage",
             "analysis": "analysis",
-            "advanced": "advanced"
+            "advanced": "advanced",
+            "privacy": "privacy"
         },
         "event": {
             "nodeAdded": "Node added to palette:",

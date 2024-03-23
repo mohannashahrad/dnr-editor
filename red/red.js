@@ -66,7 +66,11 @@ module.exports = {
             userSettings.coreNodesDir = path.resolve(path.join(__dirname,"..","nodes"));
         }
 
+        // Goes into this block [api and dnr are initialized]
         if (userSettings.httpAdminRoot !== false) {
+            console.log("***************");
+            console.log("Admin Roots");
+            console.log("***************");
             runtime.init(userSettings,api);
             api.init(httpServer,runtime);
             dnr.init(httpServer,runtime);
@@ -74,6 +78,9 @@ module.exports = {
             server = runtime.adminApi.server;
             runtime.server = runtime.adminApi.server;
         } else {
+            console.log("***************");
+            console.log("No Admin Roots");
+            console.log("***************");
             runtime.init(userSettings);
             apiEnabled = false;
             if (httpServer){
@@ -88,7 +95,9 @@ module.exports = {
         nodeApp = runtime.nodeApp;
         return;
     },
+    // Runtime and API gets started
     start: function() {
+        console.log("Runtime and API are going to be started");
         return runtime.start().then(function() {
             if (apiEnabled) {
                 return api.start();
