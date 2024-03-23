@@ -1,39 +1,203 @@
+<script type="text/html" data-template-name="tracker-config">
+    <style>
+        .policy-section {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
 
-<script type="text/x-red" data-template-name="tracker-config">
-    <div class="form-row">
-         <label for="node-input-filename"><i class="fa fa-file"></i> <span data-i18n="tracker-config.label.policyfilename"></span>Policy Filename</label>
-         <input id="node-input-filename" type="text">
+        }
+
+        .labeller-section {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+        }
+    </style>
+
+    <div class="policy-section">
+        <div class="form-row">
+            <label for="node-input-fileNameType">How to Define Policies</label>
+            <select id="node-input-fileNameType">
+                <option value="passFileName">Pass the File Path</option>
+                <option value="defineRulesHere">Define Rules Here</option>
+            </select>
+        </div>
+
+        <div class="form-row" id="node-policyFileName-row">
+            <label for="node-input-policyFileName">Policy File Path</label>
+            <input type="text" id="node-input-policyFileName" placeholder="Enter policy filename">
+        </div>
+
+        <div class="form-row" id="node-rules-row" style="display: none;">
+            <label>Define Rules</label>
+            <div id="node-rules-container"></div>
+            <button class="node-add-rule">Add Rule</button>
+        </div>
     </div>
-    <div class="form-row">
-        <label for="node-input-filename"><i class="fa fa-file"></i> <span data-i18n="tracker-config.label.labellerfilename"></span>Labeller Filename</label>
-        <input id="node-input-filename" type="text">
-   </div>
-    <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
-        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
+
+    <!-- Now Define Labellers -->
+
+    <div class="labeller-section">
+        <div class="form-row">
+            <label for="node-input-labellerType">How to Define Label Injector Functions</label>
+            <select id="node-input-labellerType">
+                <option value="passFileName">Pass the File Path</option>
+                <option value="defineLabellersHere">Define Label Injectors Here</option>
+            </select>
+        </div>
+
+        <div class="form-row" id="node-labellerFileName-row">
+            <label for="node-input-labellerFileName">Labeller File Path</label>
+            <input type="text" id="node-input-labellerFileName" placeholder="Enter Labeller Filename">
+        </div>
+
+        <div class="form-row" id="node-labellers-row" style="display: none;">
+            <label>Define Label Injectors</label>
+            <div id="node-labellers-container"></div>
+            <button class="node-add-labeller">Add Injector</button>
+        </div>
     </div>
+
 </script>
 
-<script type="text/x-red" data-help-name="tracker-config">
-    <p>NEw node type added to support configuring the policyFile and labellers' definitions for the privacy tracker</p>
+<script type="text/html" data-help-name="tracker-config">
+    <p>A custom Node-RED node that allows defining policies.</p>
 </script>
 
 <script type="text/javascript">
-    RED.nodes.registerType('tracker-config',{
-        category: 'privacy',
-        defaults: {
-            name: {value:""},
-            filetype: {value:"text"}
-        },
-        color:"BurlyWood",
-        inputs:0,
-        outputs:1,
-        icon: "file.png",
-        label: function() {
-            return this.name||this.filename;
-        },
-        labelStyle: function() {
-            return this.name?"node_label_italic":"";
+       RED.nodes.registerType('tracker-config', {
+    category: 'privacy',
+    defaults: {
+        fileNameType: { value: 'passFileName' },
+        labellerFileType: { value: 'passFileName' },
+        policyFileName: { value: '' },
+        labellerFileName: { value: '' },
+        rules: { value: [] },
+        labellers: {value: []}
+    },
+    inputs: 1,
+    outputs: 1,
+    icon: "file.png",
+    label: function() {
+        return this.name || "tracker-config";
+    },
+    oneditprepare: function() {
+        var node = this;
+
+        // Policy Variables
+        var fileNameTypeSelect = $('#node-input-fileNameType');
+        var policyFileNameRow = $('#node-policyFileName-row');
+        var rulesRow = $('#node-rules-row');
+        var rulesContainer = $('#node-rules-container');
+        var addPolicyButton = $('.node-add-rule'); // Changed to class selector
+        var savePolicyButton = $('<button class="node-save-rules">Save All Rules</button>'); 
+
+        // Labeller Variables
+        var labellerTypeSelect = $('#node-input-labellerType');
+        var labellerFileNameRow = $('#node-labellerFileName-row');
+        var labellersRow = $('#node-labellers-row');
+        var labellersContainer = $('#node-labellers-container');
+        var addLabellerButton = $('.node-add-labeller'); // Changed to class selector
+        var saveLabellerButton = $('<button class="node-save-labellers">Save All Label Injectors</button>'); 
+
+        // Function to add a rule row
+        function addRuleRow(sourceLabel, sinkLabel, action) {
+            var ruleRow = $('<div class="form-row node-rule-row"></div>');
+            var sourceInput = $('<input type="text" class="node-source-label" placeholder="Source Label">').val(sourceLabel || '');
+            var sinkInput = $('<input type="text" class="node-sink-label" placeholder="Sink Label">').val(sinkLabel || '');
+            var actionSelect = $('<select class="node-action-dropdown"><option value="allow">Allow</option><option value="disallow">Disallow</option></select>').val(action || 'allow');
+
+            ruleRow.append(sourceInput, sinkInput, actionSelect);
+            //rulesContainer.append(ruleRow);
+            $('.policy-section').append(ruleRow);
         }
-    });
+
+        // Function to add a labeller row
+        function addLabellerRow(label, func) {
+            var labellerRow = $('<div class="form-row node-labeller-row"></div>');
+            var labelInput = $('<input type="text" class="node-privacy-label" placeholder="Privacy Label">').val(label || '');
+            var functionInput = $('<input type="text" class="node-labeller_func" placeholder="Label Injector Function">').val(func || '');
+
+            labellerRow.append(labelInput, functionInput);
+            //labellersContainer.append(labelllerRow);
+            $('.labeller-section').append(labellerRow); 
+        }
+
+        // Populate rules and labellers from node object
+        if (node.rules && node.rules.length > 0) {
+            console.log(node.rules);
+            node.rules.forEach(function(rule) {
+                if (rule.source)
+                    addRuleRow(rule.source, rule.sink, rule.action);
+            });
+        }
+
+        if (node.labellers && node.labellers.length > 0) {
+            console.log(node.labellers);
+            node.labellers.forEach(function(labeller) {
+                if (labeller.label)
+                addLabellerRow(labeller.label, labeller.func);
+            });
+        }
+
+        fileNameTypeSelect.on('change', function() {
+            if (fileNameTypeSelect.val() === 'passFileName') {
+                policyFileNameRow.show();
+                rulesRow.hide();
+            } else {
+                policyFileNameRow.hide();
+                rulesRow.show();
+            }
+        });
+
+        labellerTypeSelect.on('change', function() {
+            if (labellerTypeSelect.val() === 'passFileName') {
+                labellerFileNameRow.show();
+                labellersRow.hide();
+            } else {
+                labellerFileNameRow.hide();
+                labellersRow.show();
+            }
+        });
+
+        addPolicyButton.on('click', function() {
+            addRuleRow();
+        });
+
+        addLabellerButton.on('click', function() {
+            addLabellerRow();
+        });
+
+        savePolicyButton.on('click', function() {
+            var rules = [];
+            $('.node-rule-row').each(function() {
+                var sourceLabel = $(this).find('.node-source-label').val();
+                var sinkLabel = $(this).find('.node-sink-label').val();
+                var action = $(this).find('.node-action-dropdown').val();
+                rules.push({ source: sourceLabel, sink: sinkLabel, action: action });
+            });
+            console.log("All Rules:", rules);
+            // Update node.rules array
+            node.rules = rules;
+            RED.nodes.dirty(true);
+        });
+
+        saveLabellerButton.on('click', function() {
+            var labellers = [];
+            $('.node-labeller-row').each(function() {
+                var privacyLabel = $(this).find('.node-privacy-label').val();
+                var labellerFunc = $(this).find('.node-labeller_func').val();
+                labellers.push({ label: privacyLabel, func: labellerFunc });
+            });
+            console.log("All Labellers:", labellers);
+            // Update node.rules array
+            node.labellers = labellers;
+            RED.nodes.dirty(true);
+        });
+
+        // Append save button to the node configuration panel
+        $('#node-rules-row').append(savePolicyButton);
+        $('#node-labellers-row').append(saveLabellerButton);
+    }
+});
 </script>
