@@ -18,6 +18,7 @@
 RED.dnr = (function() {
   var constraints = [];
   var privacy_rules = [];
+  var sinks = [];
 
 
   /* DNR stack initiation */
@@ -29,8 +30,11 @@ RED.dnr = (function() {
     $('#btn-constraints').click(function() { 
       $( "#node-dialog-new-constraints" ).dialog( "open" ) })
 
-    $('#btn-privacy-constraints').click(function() { 
-      $( "#node-dialog-new-privacy-constraints" ).dialog( "open" ) })
+    // $('#btn-privacy-constraints').click(function() { 
+    //   $( "#node-dialog-new-privacy-constraints" ).dialog( "open" ) })
+
+    $('#btn-sink-constraints').click(function() { 
+      $( "#node-dialog-new-sinks" ).dialog( "open" ) })
 
     $("#node-dialog-new-constraints")
     .dialog({
@@ -91,24 +95,85 @@ RED.dnr = (function() {
       }
     })
 
-    $("#node-dialog-new-privacy-constraints")
+    // $("#node-dialog-new-privacy-constraints")
+    // .dialog({
+    //   modal: true,
+    //   autoOpen: false,
+    //   width: 500,
+    //   open: function(e) {
+    //     $(this).dialog('option', 'title', 'Create a privacy requirement');
+    //     $("#createPrivayRuleBtn").text('Create')
+
+    //     var policyId = $('#policy-id').val()
+    //     if (!policyId){
+    //       return
+    //     }
+
+    //     // editing existing constraint
+    //     for (var i = 0; i < privacy_rules.length; i++){
+    //       if (privacy_rules[i].id === policyId){
+    //         var c = privacy_rules[i]
+    //         break
+    //       }
+    //     }
+
+    //     if (!c){
+    //       return
+    //     }
+
+    //     // populate fields with existing value
+    //     $("#node-dialog-new-privacy-constraints .constraint-row").remove();
+
+    //     c['rules'].forEach(function(constraint) {
+    //         // Create a new row for each constraint
+    //         var newRow = $('<div class="constraint-row">\
+    //                           <input type="text" class="source-label" placeholder="Source Label" value="' + constraint[0] + '">\
+    //                           <input type="text" class="sink-label" placeholder="Sink Label" value="' + constraint[1] + '">\
+    //                           <select class="action">\
+    //                             <option value="allow"' + (constraint[2] === "allow" ? ' selected' : '') + '>Allow</option>\
+    //                             <option value="disallow"' + (constraint[2] === "disallow" ? ' selected' : '') + '>Disallow</option>\
+    //                           </select>\
+    //                         </div>');
+
+    //         // Append the new row to the privacy constraints dialog
+    //         $("#node-dialog-new-privacy-constraints .constraints").append(newRow);
+    //     });
+
+    //     $(this).dialog('option', 'title', 'Editing existing constraint');
+    //     $("#createPrivayRuleBtn").text('Save edit')
+    //   },
+    //   close: function(e) {
+    //     resetPrivacyPolicyDialog()
+    //   },
+    //   buttons: {
+    //     Create: {
+    //       id: "createPrivayRuleBtn",
+    //       click: createPrivacyConstraint
+    //     },
+    //     Cancel: function() {
+    //       $(this).dialog("close")
+    //     }
+    //   }
+    // })
+
+    $("#node-dialog-new-sinks")
     .dialog({
       modal: true,
       autoOpen: false,
       width: 500,
       open: function(e) {
-        $(this).dialog('option', 'title', 'Create a privacy requirement');
-        $("#createPrivayRuleBtn").text('Create')
+        $(this).dialog('option', 'title', 'Declare a sink');
+        $("#createSinkBtn").text('Create')
 
-        var policyId = $('#policy-id').val()
-        if (!policyId){
+        var sinkId = $('#sink-id').val()
+        if (!sinkId){
           return
         }
 
-        // editing existing constraint
-        for (var i = 0; i < privacy_rules.length; i++){
-          if (privacy_rules[i].id === policyId){
-            var c = privacy_rules[i]
+        // editing existing sink
+        for (var i = 0; i < sinks.length; i++){
+          if (sinks[i].id === sinkId){
+            var c = sinks[i]
             break
           }
         }
@@ -117,34 +182,16 @@ RED.dnr = (function() {
           return
         }
 
-        // populate fields with existing value
-        $("#node-dialog-new-privacy-constraints .constraint-row").remove();
-
-        c['rules'].forEach(function(constraint) {
-            // Create a new row for each constraint
-            var newRow = $('<div class="constraint-row">\
-                              <input type="text" class="source-label" placeholder="Source Label" value="' + constraint[0] + '">\
-                              <input type="text" class="sink-label" placeholder="Sink Label" value="' + constraint[1] + '">\
-                              <select class="action">\
-                                <option value="allow"' + (constraint[2] === "allow" ? ' selected' : '') + '>Allow</option>\
-                                <option value="disallow"' + (constraint[2] === "disallow" ? ' selected' : '') + '>Disallow</option>\
-                              </select>\
-                            </div>');
-
-            // Append the new row to the privacy constraints dialog
-            $("#node-dialog-new-privacy-constraints .constraints").append(newRow);
-        });
-
-        $(this).dialog('option', 'title', 'Editing existing constraint');
-        $("#createPrivayRuleBtn").text('Save edit')
+        $(this).dialog('option', 'title', 'Editing existed sink');
+        $("#createSinkBtn").text('Save edit')
       },
       close: function(e) {
-        resetPrivacyPolicyDialog()
+        resetSinksDialog()
       },
       buttons: {
         Create: {
-          id: "createPrivayRuleBtn",
-          click: createPrivacyConstraint
+          id: "createSinkBtn",
+          click: createSink
         },
         Cancel: function() {
           $(this).dialog("close")
@@ -189,7 +236,11 @@ RED.dnr = (function() {
       options: []
     })
 
-    RED.menu.init({id:"btn-privacy-policy-options",
+    // RED.menu.init({id:"btn-privacy-policy-options",
+    //   options: []
+    // })
+
+    RED.menu.init({id:"btn-sink-options",
       options: []
     })
 
@@ -259,11 +310,17 @@ RED.dnr = (function() {
       '<i class="fa fa-caret-down"></i></a>'+
       '</span></li>').prependTo(".header-toolbar")
 
-      /* Privacy Requirements button */ 
+    /* Privacy Requirements button */ 
+    // $('<li><span class="deploy-button-group button-group">'+
+    //   '<a id="btn-privacy-constraints" class="deploy-button" href="#"> <span>Privacy Requirements</span></a>'+
+    //   '<a id="btn-privacy-policy-options" data-toggle="dropdown" class="deploy-button" href="#"><i class="fa fa-caret-down"></i></a>'+
+    //   '</span></li>').prependTo(".header-toolbar")
+
+    /* Sink Declerations button */ 
     $('<li><span class="deploy-button-group button-group">'+
-      '<a id="btn-privacy-constraints" class="deploy-button" href="#"> <span>Privacy Requirements</span></a>'+
-      '<a id="btn-privacy-policy-options" data-toggle="dropdown" class="deploy-button" href="#"><i class="fa fa-caret-down"></i></a>'+
-      '</span></li>').prependTo(".header-toolbar")
+    '<a id="btn-sink-constraints" class="deploy-button" href="#"> <span>Sink Decleration</span></a>'+
+    '<a id="btn-sink-options" data-toggle="dropdown" class="deploy-button" href="#"><i class="fa fa-caret-down"></i></a>'+
+    '</span></li>').prependTo(".header-toolbar")
 
     // Location constraint dialog (map)
     $('<div id="node-dialog-map" class="hide">\
@@ -292,38 +349,46 @@ RED.dnr = (function() {
     </div>').appendTo("body")
 
     /* Privacy policy definition dialog */ 
-    $('<div id="node-dialog-new-privacy-constraints" class="hide node-red-dialog">\
-      <div class="constraints">\
-          <label for="policy-id" ><i class="fa"></i>Policy Id:</label>\
-          <input type="text" id="policy-id">\
-        <button id="add-constraint-row">Add Rule</button>\
-        </div>\
-      </div>\
-    </div>').appendTo("body");
+    // $('<div id="node-dialog-new-privacy-constraints" class="hide node-red-dialog">\
+    //   <div class="constraints">\
+    //       <label for="policy-id" ><i class="fa"></i>Policy Id:</label>\
+    //       <input type="text" id="policy-id">\
+    //     <button id="add-constraint-row">Add Rule</button>\
+    //     </div>\
+    //   </div>\
+    // </div>').appendTo("body");
 
     // Function to create a new row of constraints
-    function createConstraintRow() {
-        var row = $('<div class="constraint-row">\
-                      <input type="text" class="source-label" placeholder="Source Label">\
-                      <input type="text" class="sink-label" placeholder="Sink Label">\
-                      <select class="action">\
-                        <option value="allow">Allow</option>\
-                        <option value="disallow">Disallow</option>\
-                      </select>\
-                    </div>');
-        return row;
-    }
+    // function createConstraintRow() {
+    //     var row = $('<div class="constraint-row">\
+    //                   <input type="text" class="source-label" placeholder="Source Label">\
+    //                   <input type="text" class="sink-label" placeholder="Sink Label">\
+    //                   <select class="action">\
+    //                     <option value="allow">Allow</option>\
+    //                     <option value="disallow">Disallow</option>\
+    //                   </select>\
+    //                 </div>');
+    //     return row;
+    // }
+
+    /* Sink definition dialog */ 
+    $('<div id="node-dialog-new-sinks" class="hide node-red-dialog">\
+      <div class="form-row">\
+          <label for="sink-id" ><i class="fa"></i>Sink Id:</label>\
+          <input type="text" id="sink-id">\
+      </div>\
+    </div>').appendTo("body")
 
     // Function to add a new row of constraints when the plus button is clicked
-    function addConstraintRow() {
-        var row = createConstraintRow();
-        $("#node-dialog-new-privacy-constraints .constraints").append(row);
-    }
+    // function addConstraintRow() {
+    //     var row = createConstraintRow();
+    //     $("#node-dialog-new-privacy-constraints .constraints").append(row);
+    // }
 
-    // Add event listener to the plus button
-    $("#add-constraint-row").click(function() {
-        addConstraintRow();
-    });
+    // // Add event listener to the plus button
+    // $("#add-constraint-row").click(function() {
+    //     addConstraintRow();
+    // });
 
     /* Seed flow dialog */ 
     $('<div id="seed-dialog" class="hide node-red-dialog">'+
@@ -464,17 +529,21 @@ RED.dnr = (function() {
     $("#cores-constraint").val("")
   }
 
-  function resetPrivacyPolicyDialog(){
-    $("#policy-id").val("")
+  // function resetPrivacyPolicyDialog(){
+  //   $("#policy-id").val("")
 
-    // Remove all existing rows except the first one
-    $("#node-dialog-new-privacy-constraints .constraint-row:not(:first)").remove();
+  //   // Remove all existing rows except the first one
+  //   $("#node-dialog-new-privacy-constraints .constraint-row:not(:first)").remove();
 
-    // Clear the values of input fields in the first row
-    $("#node-dialog-new-privacy-constraints .constraint-row:first").find("input").val("");
+  //   // Clear the values of input fields in the first row
+  //   $("#node-dialog-new-privacy-constraints .constraint-row:first").find("input").val("");
 
-    // Reset the action dropdown to its default value (allow)
-    $("#node-dialog-new-privacy-constraints .constraint-row:first").find(".action").val("allow");
+  //   // Reset the action dropdown to its default value (allow)
+  //   $("#node-dialog-new-privacy-constraints .constraint-row:first").find(".action").val("allow");
+  // }
+
+  function resetSinksDialog(){
+    $("#sink-id").val("")
   }
 
   function showDnrSeed(){
@@ -505,8 +574,9 @@ RED.dnr = (function() {
 
   function toggleConstraints(checked) {
     d3.selectAll('.node_constraints_group').style("display", checked ? "inline" : "none")
-    d3.selectAll('.privacy_constraints_group').style("display", checked ? "inline" : "none")
+    //d3.selectAll('.policy_constraints_group').style("display", checked ? "inline" : "none")
     d3.selectAll('.link_constraint_group').style("display", checked ? "inline" : "none")
+    d3.selectAll('.node_sinks_group').style("display", checked ? "inline" : "none")
   }
 
   function createConstraint(){
@@ -564,35 +634,51 @@ RED.dnr = (function() {
     $(this).dialog( "close" );
   }
 
-  function createPrivacyConstraint(){
+  // function createPrivacyConstraint(){
 
-    var policyId = $( "#policy-id" ).val();
-    if (!policyId){
-        alert('policyId is required');
+  //   var policyId = $( "#policy-id" ).val();
+  //   if (!policyId){
+  //       alert('policyId is required');
+  //       return;
+  //   }
+
+  //   var creatingPolicy = {
+  //     id:policyId
+  //   }
+
+  //   var rules = [];
+
+  //   // Loop through each row of constraints
+  //   $(".constraint-row").each(function() {
+  //       // Get the values of source label, sink label, and action
+  //       var sourceLabel = $(this).find(".source-label").val();
+  //       var sinkLabel = $(this).find(".sink-label").val();
+  //       var action = $(this).find(".action").val();
+
+  //       // Append the rule to the array
+  //       rules.push([sourceLabel, sinkLabel, action]);
+  //   });
+
+  //   creatingPolicy['rules'] = rules;
+
+  //   // the new policy should be shown in the drop-down menu
+  //   addPolicyToGui(creatingPolicy);
+
+  //   $(this).dialog( "close" );
+  // }
+
+  function createSink(){
+    var sinkId = $( "#sink-id" ).val();
+    if (!sinkId){
+        alert('sinkId is required');
         return;
     }
 
-    var creatingPolicy = {
-      id:policyId
+    var creatingSink = {
+      id:sinkId
     }
 
-    var rules = [];
-
-    // Loop through each row of constraints
-    $(".constraint-row").each(function() {
-        // Get the values of source label, sink label, and action
-        var sourceLabel = $(this).find(".source-label").val();
-        var sinkLabel = $(this).find(".sink-label").val();
-        var action = $(this).find(".action").val();
-
-        // Append the rule to the array
-        rules.push([sourceLabel, sinkLabel, action]);
-    });
-
-    creatingPolicy['rules'] = rules;
-
-    // the new policy should be shown in the drop-down menu
-    addPolicyToGui(creatingPolicy);
+    addSinkToGui(creatingSink);
 
     $(this).dialog( "close" );
   }
@@ -654,26 +740,89 @@ RED.dnr = (function() {
   }
 
   // add a constraint to constraint dropdown list
-  function addPolicyToGui(c){
-    console.log("Entered addPolicyToGui() function");
+  // function addPolicyToGui(c){
+  //   console.log("Entered addPolicyToGui() function");
 
+  //   // check if c id is unique (exist or not)
+  //   for (var i = 0; i < privacy_rules.length; i++){
+  //     if (c.id && c.id === privacy_rules[i].id){
+  //       console.log("Found existing privacy constraint");
+  //       // updating existing policies
+  //       c.fill = privacy_rules[i].fill
+  //       c.text = privacy_rules[i].text
+  //       privacy_rules[i] = c
+
+  //       // TEST: update the constraints that are attached to all the nodes
+  //       RED.nodes.eachNode(function(node){
+  //         if (!node.privacy_rules){
+  //           return
+  //         }
+  //         for (var id in node.privacy_rules){
+  //           if (id === c.id){
+  //             node.privacy_rules[id] = c
+  //             break
+  //           }
+  //         }
+  //       })
+  //       return
+  //     }
+  //   }  
+
+  //   console.log("Policy not existing from before");
+
+  //   // add it to the constraints list
+  //   c.fill = c.fill ? c.fill : randomColor();
+  //   c.text = c.text ? c.text : c.id;
+
+  //   privacy_rules.push(c);
+
+  //   console.log("Now updated the global privacy_rules");
+  //   console.log(privacy_rules);
+
+  //   RED.menu.addItem("btn-privacy-policy-options", {
+  //     id:c.id,
+  //     label:c.id,
+  //     onselect:function(s) { 
+  //       var nodeSelected = false
+
+  //       RED.nodes.eachNode(function(node){
+  //         if (node.selected){
+  //           nodeSelected = true
+  //           return
+  //         }
+  //       })
+
+  //       if (!nodeSelected){
+  //         // no node is selected, allow to edit current constraint
+  //         $( "#policy-id" ).val(c['id'])
+  //         $( "#node-dialog-new-privacy-constraints" ).dialog( "open" )
+  //       } else {
+  //         // reset policy fields to blank
+  //         resetPrivacyPolicyDialog()
+
+  //         // apply the policy to the nodes selected
+  //         setNodePrivacyPolicy(c['id'])
+  //       }
+  //     }
+  //   })
+  // }
+
+  function addSinkToGui(c){
     // check if c id is unique (exist or not)
-    for (var i = 0; i < privacy_rules.length; i++){
-      if (c.id && c.id === privacy_rules[i].id){
-        console.log("Found existing privacy constraint");
-        // updating existing policies
-        c.fill = privacy_rules[i].fill
-        c.text = privacy_rules[i].text
-        privacy_rules[i] = c
-
-        // TEST: update the constraints that are attached to all the nodes
+    for (var i = 0; i < sinks.length; i++){
+      if (c.id && c.id === sinks[i].id){
+        // updating existing sink
+        c.fill = sinks[i].fill
+        c.text = sinks[i].text
+        sinks[i] = c
+        // TEST: update the sinks that are attached to all the nodes
         RED.nodes.eachNode(function(node){
-          if (!node.privacy_rules){
+          if (!node.sinks){
             return
           }
-          for (var id in node.privacy_rules){
+          for (var id in node.sinks){
             if (id === c.id){
-              node.privacy_rules[id] = c
+              node.sinks[id] = c
               break
             }
           }
@@ -682,18 +831,12 @@ RED.dnr = (function() {
       }
     }  
 
-    console.log("Policy not existing from before");
-
-    // add it to the constraints list
+    // add it to the sinks list
     c.fill = c.fill ? c.fill : randomColor();
     c.text = c.text ? c.text : c.id;
+    sinks.push(c);
 
-    privacy_rules.push(c);
-
-    console.log("Now updated the global privacy_rules");
-    console.log(privacy_rules);
-
-    RED.menu.addItem("btn-privacy-policy-options", {
+    RED.menu.addItem("btn-sink-options", {
       id:c.id,
       label:c.id,
       onselect:function(s) { 
@@ -707,15 +850,13 @@ RED.dnr = (function() {
         })
 
         if (!nodeSelected){
-          // no node is selected, allow to edit current constraint
-          $( "#policy-id" ).val(c['id'])
-          $( "#node-dialog-new-privacy-constraints" ).dialog( "open" )
+          // no node is selected, allow to edit current sink
+          $( "#sink-id" ).val(c['id'])
+          $( "#node-dialog-new-sinks" ).dialog( "open" )
         } else {
-          // reset policy fields to blank
-          resetPrivacyPolicyDialog()
-
-          // apply the policy to the nodes selected
-          setNodePrivacyPolicy(c['id'])
+          // reset these fields to blank
+          resetSinksDialog()
+          setNodeSink(c['id'])
         }
       }
     })
@@ -893,29 +1034,54 @@ RED.dnr = (function() {
     })
   }
 
-  function setNodePrivacyPolicy(cid){
+  // function setNodePrivacyPolicy(cid){
+  //   var c
+  //   for (var i = 0; i < privacy_rules.length; i++){
+  //     if (cid === privacy_rules[i].id){
+  //       c = privacy_rules[i]
+  //       break
+  //     }
+  //   } 
+
+  //   if (!c){
+  //     console.log("Could not found the privacy policy by id");
+  //     return
+  //   }
+
+  //   console.log("In setNodePrivacyPolicy() fucntion: found the policy globally");
+  //   var appliedTo = 0;
+
+  //   d3.selectAll('.node_selected').each(function(node){
+  //     if (!node['privacy_rules'])
+  //       node['privacy_rules'] = {}
+
+  //     node.privacy_rules[c.id] = c
+  //     redrawPolicies(d3.select(this.parentNode))
+  //     RED.nodes.dirty(true)
+  //   })
+  // }
+
+  function setNodeSink(cid){
     var c
-    for (var i = 0; i < privacy_rules.length; i++){
-      if (cid === privacy_rules[i].id){
-        c = privacy_rules[i]
+    for (var i = 0; i < sinks.length; i++){
+      if (cid === sinks[i].id){
+        c = sinks[i]
         break
       }
     } 
 
     if (!c){
-      console.log("Could not found the privacy policy by id");
       return
     }
 
-    console.log("In setNodePrivacyPolicy() fucntion: found the policy globally");
     var appliedTo = 0;
 
     d3.selectAll('.node_selected').each(function(node){
-      if (!node['privacy_rules'])
-        node['privacy_rules'] = {}
+      if (!node['sinks'])
+        node['sinks'] = {}
 
-      node.privacy_rules[c.id] = c
-      redrawPolicies(d3.select(this.parentNode))
+      node.sinks[c.id] = c
+      redrawSinks(d3.select(this.parentNode))
       RED.nodes.dirty(true)
     })
   }
@@ -928,6 +1094,9 @@ RED.dnr = (function() {
     // also loading the privacy_rules 
     if(n.privacy_rules)
       node['privacy_rules'] = n.privacy_rules;
+
+    if(n.sinks)
+      node['sinks'] = n.sinks;
   }
 
   // when server starts, load constraints to constraints list 
@@ -949,18 +1118,35 @@ RED.dnr = (function() {
   }
 
   // when server starts, load privacy_rules to constraints list 
-  function loadPrivacyConstraints(nodes){
-    console.log("Loading privacy constraitns");
+  // function loadPrivacyConstraints(nodes){
+  //   console.log("Loading privacy constraitns");
+  
+  //   for (var i = 0; i < nodes.length; i++){
+  //     if (!nodes[i]['privacy_rules'] || Object.keys(nodes[i]['privacy_rules']).length === 0) {
+
+  //       continue;
+  //     }
+
+  //     var nConstraints = nodes[i].privacy_rules;
+  //     for (c in nConstraints){
+  //       addPolicyToGui(nConstraints[c]);
+  //     }
+  //   }
+  // }
+
+  function loadSinks(nodes){
   
     for (var i = 0; i < nodes.length; i++){
-      if (!nodes[i]['privacy_rules'] || Object.keys(nodes[i]['privacy_rules']).length === 0) {
-
+      if (!nodes[i]['sinks'])
         continue;
-      }
 
-      var nConstraints = nodes[i].privacy_rules;
-      for (c in nConstraints){
-        addPolicyToGui(nConstraints[c]);
+      console.log(nodes[i]['sinks']);
+      var nSinks = nodes[i].sinks;
+      for (c in nSinks){
+        if (c !== 'link'){
+          console.log("In load sinks before adding them to GUI");
+          addSinkToGui(nSinks[c]);
+        }
       }
     }
   }
@@ -1029,63 +1215,122 @@ RED.dnr = (function() {
 
   }
 
-  function redrawPolicies(thisNode){
-    console.log(" In the redrawPolicies() function")
+  // function redrawPolicies(thisNode){
+  //   console.log(" In the redrawPolicies() function")
+  //   var d = thisNode.data()[0]
+
+  //   var policy_constraints_group = thisNode.selectAll('.policy_constraints_group');
+    
+  //   if (policy_constraints_group[0].length === 0){
+  //     policy_constraints_group = thisNode.append("svg:g").attr("class","policy_constraints_group")
+  //   }
+
+  //   var policy_constraints_list = thisNode.selectAll('.policy_constraint');
+
+  //   policy_constraints_group.style("display","inline");
+
+  //   var policyConstraints = [];
+
+  //   for (var c in d.privacy_rules){
+  //     policyConstraints.push(d.privacy_rules[c]);
+  //   }
+
+  //   // TODO: weak check on array matching, should check with constraint id (data) and text label (view)
+  //   if (policy_constraints_list[0].length === policyConstraints.length)
+  //     return;
+
+  //   // create new nodes with a fresh start (avoid mix and match)
+  //   policy_constraints_list.remove();
+
+  //   policy_constraints_group
+  //     .attr("transform","translate(40, -" + policyConstraints.length * 12 + ")")
+  //     .style({"font-style": "italic", "font-size": 12});
+
+  //   for (var j = 0; j < policyConstraints.length; j++){
+
+  //     console.log("In the redraw function, policy contrsiants are");
+  //     console.log(policyConstraints);
+
+  //     var constraintData = policyConstraints[j];
+  //     var fill = constraintData.fill || "black";
+  //     // var shape = constraintData.shape;
+
+  //     var policy_constraint = policy_constraints_group.append("svg:g");
+  //     var makeCallback = function(id, policy_constraint){
+  //       return function(){
+  //         console.log('deleting')
+  //         delete d.privacy_rules[id];
+  //         policy_constraint.remove();
+  //         RED.nodes.dirty(true);
+  //       }
+  //     };
+  //     policy_constraint.style({fill: fill, stroke: fill})
+  //       .attr("class","policy_constraint")
+  //       .attr("transform","translate(0, " + j*17 + ")")
+  //       .on("mousedown", makeCallback(constraintData.id, policy_constraint));
+
+  //       policy_constraint.append("svg:text")
+  //       .attr("class","policy_constraint_label")
+  //       .text(constraintData.text ? constraintData.text : "");
+  //   } 
+
+  // }
+
+  function redrawSinks(thisNode){
     var d = thisNode.data()[0]
 
-    var policy_constraints_group = thisNode.selectAll('.policy_constraints_group');
+    var node_sinks_group = thisNode.selectAll('.node_sinks_group');
     
-    if (policy_constraints_group[0].length === 0){
-      policy_constraints_group = thisNode.append("svg:g").attr("class","policy_constraints_group")
+    if (node_sinks_group[0].length === 0){
+      node_sinks_group = thisNode.append("svg:g").attr("class","node_sinks_group")
     }
 
-    var policy_constraints_list = thisNode.selectAll('.policy_constraint');
+    var node_sinks_list = thisNode.selectAll('.node_sink');
 
-    policy_constraints_group.style("display","inline");
+    node_sinks_group.style("display","inline");
 
-    var policyConstraints = [];
+    var nodeSinks = [];
 
-    for (var c in d.privacy_rules){
-      policyConstraints.push(d.privacy_rules[c]);
+    for (var c in d.sinks){
+      nodeSinks.push(d.sinks[c]);
     }
 
-    // TODO: weak check on array matching, should check with constraint id (data) and text label (view)
-    if (policy_constraints_list[0].length === policyConstraints.length)
+    // TODO: weak check on array matching, should check with sink id (data) and text label (view)
+    if (node_sinks_list[0].length === nodeSinks.length)
       return;
 
     // create new nodes with a fresh start (avoid mix and match)
-    policy_constraints_list.remove();
+    node_sinks_list.remove();
 
-    policy_constraints_group
-      .attr("transform","translate(40, -" + policyConstraints.length * 12 + ")")
+    node_sinks_group
+      .attr("transform","translate(3, -" + nodeSinks.length * 12 + ")")
       .style({"font-style": "italic", "font-size": 12});
 
-    for (var j = 0; j < policyConstraints.length; j++){
+    for (var j = 0; j < nodeSinks.length; j++){
 
-      console.log("In the redraw function, policy contrsiants are");
-      console.log(policyConstraints);
+      console.log("In the redraw function, node contrsiants are");
+      console.log(nodeSinks);
 
-      var constraintData = policyConstraints[j];
-      var fill = constraintData.fill || "black";
-      // var shape = constraintData.shape;
+      var sinkData = nodeSinks[j];
+      var fill = sinkData.fill || "black";
 
-      var policy_constraint = policy_constraints_group.append("svg:g");
-      var makeCallback = function(id, policy_constraint){
+      var node_sink = node_sinks_group.append("svg:g");
+      var makeCallback = function(id, node_sink){
         return function(){
           console.log('deleting')
-          delete d.privacy_rules[id];
-          policy_constraint.remove();
+          delete d.sinks[id];
+          node_sink.remove();
           RED.nodes.dirty(true);
         }
       };
-      policy_constraint.style({fill: fill, stroke: fill})
-        .attr("class","policy_constraint")
+      node_sink.style({fill: fill, stroke: fill})
+        .attr("class","node_sink")
         .attr("transform","translate(0, " + j*17 + ")")
-        .on("mousedown", makeCallback(constraintData.id, policy_constraint));
+        .on("mousedown", makeCallback(sinkData.id, node_sink));
 
-        policy_constraint.append("svg:text")
-        .attr("class","policy_constraint_label")
-        .text(constraintData.text ? constraintData.text : "");
+      node_sink.append("svg:text")
+        .attr("class","node_sink_label")
+        .text(sinkData.text ? sinkData.text : "");
     } 
 
   }
@@ -1139,9 +1384,11 @@ RED.dnr = (function() {
      redrawLinkConstraint: redrawLinkConstraint,
      prepareConstraints: prepareConstraints,
      loadConstraints: loadConstraints,
-     loadPrivacyConstraints: loadPrivacyConstraints,
+     //loadPrivacyConstraints: loadPrivacyConstraints,
+     loadSinks: loadSinks,
      redrawConstraints: redrawConstraints,
-     redrawPolicies: redrawPolicies,
+     //redrawPolicies: redrawPolicies,
+     redrawSinks: redrawSinks,
      init: init
   }
  })()
@@ -1397,5 +1644,3 @@ RED.sidebar.devices = (function() {
     init: init
   }
 })()
-
-

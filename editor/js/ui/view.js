@@ -2400,7 +2400,8 @@ RED.view = (function() {
                         }
 
                         RED.dnr.redrawConstraints(thisNode);
-                        RED.dnr.redrawPolicies(thisNode);
+                        //RED.dnr.redrawPolicies(thisNode);
+                        RED.dnr.redrawSinks(thisNode);
 
                         d.dirty = false;
                     }
