@@ -208,7 +208,8 @@ module.exports = {
     //    context.global.os
 
     functionGlobalContext: {
-        // os:require('os'),
+        fs:require('fs'),
+        csv_parser:require('csv-parser'),
         // jfive:require("johnny-five"),
         // j5board:require("johnny-five").Board({repl:false})
         PrivacyTrackerConfiguration: require('./nodes/core/privacy/privacy_tracker_config.js')

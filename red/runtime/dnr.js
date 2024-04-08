@@ -144,6 +144,7 @@ function assignBrokers(dnrSyncReq){
     }
 */
 function processDnrSyncRequest(dnrSyncReq){
+  console.log("Inside the processDnrSyncRequest function");
   let deviceId = dnrSyncReq.deviceId
   if (!activeDevices[deviceId]){
     log.warn('receive a dnr sync request from an unknown device')
@@ -157,11 +158,7 @@ function processDnrSyncRequest(dnrSyncReq){
   }
 
   let dnrLinks = dnrSyncReq.dnrLinks
-  // console.log("***** Mohanna Added this for the dnrLinks ******");
-  // console.log(dnrLinks);
   let contributingNodes = dnrSyncReq.contributingNodes
-  // console.log(contributingNodes);
-  // console.log("*********");
   
   activeDevices[deviceId].contributingNodes = contributingNodes
 
@@ -344,6 +341,7 @@ function getUniqueId(){
   return connId
 }
 
+// When a device gets connected to the editor
 function start(){
   wsServer.on('connection',function(ws) {
     let device = 'annonymous'
@@ -360,7 +358,7 @@ function start(){
 
     ws.on('message', function(data,flags) {
       console.log(data)
-      console.log("***************** Mohanna added this *****************");
+      console.log("*******************************************************");
       if (ws.readyState != 1){
         return
       }

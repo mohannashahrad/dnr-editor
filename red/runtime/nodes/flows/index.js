@@ -125,8 +125,12 @@ function setFlows(_config,type,muteLog,forceStart) {
             return _config.rev;
         });
     } else {
+        //console.log("in setFlows line 129");
+        //console.log(type);
         config = clone(_config);
         newFlowConfig = flowUtil.parseConfig(clone(config));
+        //console.log(config);
+        //console.log(newFlowConfig);
         diff = flowUtil.diffConfigs(activeFlowConfig,newFlowConfig);
 
         // Now the flows have been compared, remove any credentials from newFlowConfig

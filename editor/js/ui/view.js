@@ -2401,7 +2401,7 @@ RED.view = (function() {
 
                         RED.dnr.redrawConstraints(thisNode);
                         //RED.dnr.redrawPolicies(thisNode);
-                        RED.dnr.redrawSinks(thisNode);
+                        RED.dnr.redrawPrivacyLabels(thisNode);
 
                         d.dirty = false;
                     }
