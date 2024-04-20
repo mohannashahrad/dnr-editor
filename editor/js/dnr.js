@@ -1123,7 +1123,7 @@ RED.dnr = (function() {
     node_privacy_labels_list.remove();
 
     node_privacy_labels_group
-      .attr("transform","translate(3, -" + nodePrivacyLabels.length * 12 + ")")
+      .attr("transform","translate(30, -" + nodePrivacyLabels.length * 12 + ")")
       .style({"font-style": "italic", "font-size": 12});
 
     for (var j = 0; j < nodePrivacyLabels.length; j++){
@@ -1283,6 +1283,9 @@ RED.sidebar.devices = (function() {
           var cpuBar = $('<div style="line-height: 17px; height: 17px; width: ' + entry.cpuFree + '%; background: #00B1B8; color: white;">CPU</div>').appendTo(cpuRow) 
           // var cpuText = $('<span>').html(entry.cpus).appendTo(cpuRow) 
 
+          var privacyRow = $('<div class="device-meta device-privacyTags"><i class="fa fa-tags" style="margin-right: 5px;"></i></div>').appendTo(headerRow);
+          var privacyText = $('<span>').html(entry.privacyText).appendTo(privacyRow) 
+
           var metaRow = $('<div class="device-meta device-lastSeen"><i class="fa fa-clock-o" style="margin-right: 5px;"></i></div>').appendTo(headerRow);
 
           var lastSeenText = $('<span>').html(entry.lastSeen).appendTo(metaRow)
@@ -1298,6 +1301,7 @@ RED.sidebar.devices = (function() {
             lastSeenText: lastSeenText,
             memoryBar: memoryBar,
             cpuBar: cpuBar,
+            privacyText: privacyText,
             // cpuText: cpuText,
             container: container,
             headerRow: headerRow,
@@ -1376,6 +1380,8 @@ RED.sidebar.devices = (function() {
 
       if (topic === 'devices/heartbeat'){
         var ctx = JSON.stringify(device.context)
+        console.log("context from heart beat is");
+        console.log(ctx);
         devices[device.id].context = device.context
         devices[device.id].lastSeen = device.lastSeen
         var lastSeenTime = new Date(device.lastSeen)
@@ -1386,6 +1392,8 @@ RED.sidebar.devices = (function() {
         )
         devices[device.id].elements.memoryBar.css('width', devices[device.id].context.freeMem/4000000000 + '%')
         devices[device.id].elements.cpuBar.css('width', devices[device.id].context.cpuFree + '%')
+        var privacyTagsString = JSON.stringify(devices[device.id].context.privacy.tags);
+        devices[device.id].elements.privacyText.html(privacyTagsString);
         devices[device.id].elements.headerRow.attr("title", ctx)
         updateMap()
       }
@@ -1436,7 +1444,7 @@ RED.sidebar.devices = (function() {
         cpuFree: devices[id].context.cpuFree,
         cores: devices[id].context.cores,
         lat: devices[id].context.location.lat,
-        lng: devices[id].context.location.lng
+        lng: devices[id].context.location.lng,
       })
     }
 
