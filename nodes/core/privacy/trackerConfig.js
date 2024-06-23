@@ -36,6 +36,9 @@ module.exports = function(RED) {
 
             });
 
+            // Add default labellers only used internally 
+            labeller_dict['identity'] = obj => obj[1];
+
             // This is just the read/access rules 
             rules.forEach(item => {
                 if (item.action === 'allow') {
@@ -55,8 +58,24 @@ module.exports = function(RED) {
             node.context().flow.set('tracker', tracker);
             
             msg.tracker = tracker;
+
+            // set a unique tracking id to the msg object to track its label
+            msg.tracking_id = generateRandomId();
+            msg.tracking_labels = {owners:[], readers:[]};
+
             node.send(msg);
         });
+    }
+
+    function generateRandomId() {
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let randomId = '';
+    
+        for (let i = 0; i < 8; i++) {
+            randomId += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+    
+        return randomId;
     }
 
     RED.nodes.registerType('tracker-config', TrackerConfig);

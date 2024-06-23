@@ -14,7 +14,6 @@
  * limitations under the License.
  **/
 
-
 RED.dnr = (function() {
   var constraints = [];
   var privacy_labels = [];
@@ -122,7 +121,6 @@ RED.dnr = (function() {
         $("#node-dialog-new-privacy-labels .data-labeller-row").remove();
 
         // TODO: What if there are multiple node or data labellers?
-
         if (c.node_labeller) {
           console.log("node labeller already exists");
           console.log(c.node_labeller);
@@ -957,6 +955,7 @@ RED.dnr = (function() {
     })
   }
 
+  // Applying a label to a node
   function setNodePrivacyLabel(cid){
     var c
     for (var i = 0; i < privacy_labels.length; i++){
@@ -971,12 +970,47 @@ RED.dnr = (function() {
     }
 
     var appliedTo = 0;
+    console.log(c);
 
-    d3.selectAll('.node_selected').each(function(node){
+    d3.selectAll('.node_selected').each(function(node){      
       if (!node['privacy_labels'])
         node['privacy_labels'] = {}
 
       node.privacy_labels[c.id] = c
+
+      // If the selected node has a node labeller
+      // update the violation_handler and add a new handler port for it
+      if (c.node_labeller) {
+        console.log("locating the privacy handler node");
+        RED.nodes.eachNode(function(aNode){
+          console.log(aNode);
+          console.log(aNode.type);
+          if (aNode.name === 'privacy_violation_switch'){
+            console.log(aNode);
+            
+            // check if already the port for the node being labelled is added
+            var portExists = false;
+            aNode['rules'].forEach(function(rule) {
+              if (rule.v === node.id) {
+                console.log("port already exist");
+                portExists = true;
+              }
+            });
+
+            // If port doesn't exist, update the switch node
+            if (!portExists) {
+              aNode['ports'].push(aNode['ports'][aNode['ports'].length - 1] + 1);
+              aNode['outputs'] = aNode['outputs'] + 1;
+              aNode['rules'].push({
+                "t": "eq",
+                "v": node.id,
+                "vt": "str"
+              });
+              }
+          }
+        });
+      }
+
       redrawPrivacyLabels(d3.select(this.parentNode))
       RED.nodes.dirty(true)
     })

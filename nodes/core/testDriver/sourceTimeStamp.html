@@ -1,0 +1,65 @@
+<script type="text/javascript">
+
+    function doInject(node, customMsg) {
+        var label = node._def.label.call(node,customMsg?customMsg.__user_inject_props__:undefined);
+        if (label.length > 30) {
+            label = label.substring(0, 50) + "...";
+        }
+        label = label.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        $.ajax({
+            url: "customInject/" + node.id,
+            type: "POST",
+            data: JSON.stringify(customMsg||{}),
+            contentType: "application/json; charset=utf-8",
+            success: function (resp) {
+                RED.notify(node._("inject.success", { label: label }), { type: "success", id: "inject", timeout: 2000 });
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                if (jqXHR.status == 404) {
+                    RED.notify(node._("common.notification.error", { message: node._("common.notification.errors.not-deployed") }), "error");
+                } else if (jqXHR.status == 500) {
+                    RED.notify(node._("common.notification.error", { message: node._("inject.errors.failed") }), "error");
+                } else if (jqXHR.status == 0) {
+                    RED.notify(node._("common.notification.error", { message: node._("common.notification.errors.no-response") }), "error");
+                } else {
+                    RED.notify(node._("common.notification.error", { message: node._("common.notification.errors.unexpected", { status: jqXHR.status, message: textStatus }) }), "error");
+                }
+            }
+        });
+    }
+
+    RED.nodes.registerType('source-timestamp', {
+        category: 'testDriver',
+        color: '#a6bbcf',
+        defaults: {
+            name: { value: "" }
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "clock.svg",
+        label: function() {
+            return this.name || "source-timestamp";
+        },
+        oneditprepare: function() {
+            $("#node-input-name").val(this.name);
+        },
+        oneditsave: function() {
+            this.name = $("#node-input-name").val();
+        },
+        button: {
+            enabled: function() {
+                return !this.changed
+            },
+            onclick: function () {
+                if (this.changed) {
+                    return RED.notify(RED._("notification.warning", { message: RED._("notification.warnings.undeployedChanges") }), "warning");
+                }
+                doInject(this);
+            }
+        },
+    });
+</script>
+<div class="form-row">
+    <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name">
+</div>

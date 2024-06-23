@@ -198,6 +198,9 @@ function processDnrSyncRequest(dnrSyncReq){
 
     }
     let commTopic
+    // New_Change: The privacy info of the receiver might also be shared with the sender device
+    let receiverPrivacyCtx = null;
+
     if (linkState === dnrInterface.Context.FETCH_FORWARD || linkState === dnrInterface.Context.COPY_FETCH_FORWARD){
       // find one device that host srcId
       // let hightestLinkScoreDevId = findLinkScoreBasedDeviceForNode(sourceId, 0)
@@ -237,6 +240,9 @@ function processDnrSyncRequest(dnrSyncReq){
           // "from_deviceId_to_<deviceId>_<srcId>_<srcPort>_<destId>"
           commTopic = "from_" + deviceId + 
                       "_to_" + mostFreeDevId + "_" + link
+          // In the case of 11, for the sender side (RR or RRC), the privacy label of the device should also be shared
+          console.log("receiverPrivacyLabel value will be: ");
+          receiverPrivacyCtx = activeDevices[mostFreeDevId].context;
           break
         case 'N1':
           // "to_<deviceId>_<srcId>_<srcPort>_<destId>"
@@ -247,7 +253,11 @@ function processDnrSyncRequest(dnrSyncReq){
       }
     }
 
-    if (commTopic){
+    if (commTopic && receiverPrivacyCtx) {
+      console.log("privacy label is also sent with commTopic");
+      dnrLinksResponse[link] = {"topic": commTopic, "receiverPrivacyCtx": receiverPrivacyCtx}
+    }
+    else if (commTopic){
       dnrLinksResponse[link] = commTopic
     }
   }
@@ -357,8 +367,8 @@ function start(){
     });
 
     ws.on('message', function(data,flags) {
+      console.log("***************** RECIEVED msg on server ***************************");
       console.log(data)
-      console.log("*******************************************************");
       if (ws.readyState != 1){
         return
       }
@@ -392,6 +402,7 @@ function start(){
           return
         }
 
+        // Device context gets updated
         updateDevice(device, msg.context)
 
         // processing any coordination requests
@@ -410,13 +421,17 @@ function start(){
             log.warn('id in dnrSyncReq not match with heartbeat request - ' + dnrSyncReq.deviceId + ' vs ' + device)
             continue
           }
+          // TODO: here we should handle the privacy checks
           let dnrLinksRes = processDnrSyncRequest(dnrSyncReq)
-          let dnrBrokers = assignBrokers(dnrSyncReq)
+          
+          // NOTE: This function does not do anything in this version of DNR
+          let dnrBrokers = assignBrokers(dnrSyncReq);
           resp.push({
             'dnrSyncReq': dnrSyncReq,
             'dnrSyncRes': new DnrSyncRes(dnrLinksRes, dnrBrokers)
           })
         }
+        // sending TOPIC_DNR_SYN_RESS back to device daemons
         ws.send(JSON.stringify({
           'topic': TOPIC_DNR_SYN_RESS,
           'dnrSync' : resp

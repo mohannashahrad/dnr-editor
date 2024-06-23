@@ -125,14 +125,8 @@ function setFlows(_config,type,muteLog,forceStart) {
             return _config.rev;
         });
     } else {
-        console.log("in setFlows line 129");        
         config = clone(_config);
         newFlowConfig = flowUtil.parseConfig(clone(config));
-
-        console.log("config is ");
-        console.log(config);
-        console.log("new flow config is: ");
-        console.log(newFlowConfig);
 
         diff = flowUtil.diffConfigs(activeFlowConfig,newFlowConfig);
 

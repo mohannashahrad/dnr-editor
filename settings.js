@@ -212,7 +212,7 @@ module.exports = {
         csv_parser:require('csv-parser'),
         // jfive:require("johnny-five"),
         // j5board:require("johnny-five").Board({repl:false})
-        PrivacyTrackerConfiguration: require('./nodes/core/privacy/privacy_tracker_config.js')
+        PrivacyTrackerConfiguration: require('./nodes/core/privacy/trackerConfig.js')
     },
 
     // Context Storage

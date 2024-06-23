@@ -194,7 +194,9 @@ RED.nodes = (function() {
         }
         if (n._def.category == "config") {
             configNodes[n.id] = n;
+            console.log("198");
         } else {
+            console.log("200");
             n.ports = [];
             if (n.wires && (n.wires.length > n.outputs)) { n.outputs = n.wires.length; }
             if (n.outputs) {
@@ -203,6 +205,7 @@ RED.nodes = (function() {
                 }
             }
             n.dirty = true;
+            console.log("209");
             updateConfigNodeUsers(n);
             if (n._def.category == "subflows" && typeof n.i === "undefined") {
                 var nextId = 0;
@@ -211,6 +214,7 @@ RED.nodes = (function() {
                 });
                 n.i = nextId+1;
             }
+            console.log("218");
             nodes.push(n);
         }
         RED.events.emit('nodes:add',n);
