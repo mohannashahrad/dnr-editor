@@ -85,3 +85,12 @@ It was created by [IBM Emerging Technology](https://www.ibm.com/blogs/emerging-t
 DNR Editor is an extension of Node-RED inspired by Mike Blackstock [@mblackstock](http://twitter.com/mblackstock) and created by Nam Giang <kyng@ece.ubc.ca>
 
 This is a research project funded by NSERC that aims at designing a distributed application platform for the Internet of Things and Fog Computing.
+
+## Note for setting up the environment for Turnstile
+The versions and configurations used for the experiments were. (Essentially, the node-gyp and fibers version in the initial implementation restrict other dependencies to be up-graded)
+
+python2.7
+Node v10.12.0
+npm v6.4.1 
+node-gyp@3.8.0 
+fibers@2.0.2
