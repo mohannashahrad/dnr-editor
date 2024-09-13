@@ -42,9 +42,9 @@ module.exports = function(RED) {
             // This is just the read/access rules 
             rules.forEach(item => {
                 if (item.action === 'allow') {
-                    rules_list.push(item.sink + ' <- ' + item.source);
+                    rules_list.push(item.source + ' -> ' + item.sink);
                 } else {
-                    rules_list.push(item.sink + ' </- ' + item.source);
+                    rules_list.push(item.source + ' -/> ' + item.sink);
                 }
             });
 

@@ -122,9 +122,6 @@ RED.dnr = (function() {
 
         // TODO: What if there are multiple node or data labellers?
         if (c.node_labeller) {
-          console.log("node labeller already exists");
-          console.log(c.node_labeller);
-          console.log(c.node_labeller_modules);
             // Create a new row for each constraint
             var newRow = $('<div class="node-labeller-row">\
             <label for="node-labeller-modules"><i class="fa"></i>Modules Required:</label>\
@@ -664,10 +661,6 @@ RED.dnr = (function() {
     if (node_labeller_modules)
       creatingPrivacyLabel['node_labeller_modules'] = node_labeller_modules;
 
-    console.log("The newly created label is as below");
-    console.log(creatingPrivacyLabel);
-    console.log(node_labeller);
-
     addPrivacyLabelToGui(creatingPrivacyLabel);
 
     $(this).dialog( "close" );
@@ -983,16 +976,11 @@ RED.dnr = (function() {
       if (c.node_labeller) {
         console.log("locating the privacy handler node");
         RED.nodes.eachNode(function(aNode){
-          console.log(aNode);
-          console.log(aNode.type);
-          if (aNode.name === 'privacy_violation_switch'){
-            console.log(aNode);
-            
+          if (aNode.name === 'privacy_violation_switch'){            
             // check if already the port for the node being labelled is added
             var portExists = false;
             aNode['rules'].forEach(function(rule) {
               if (rule.v === node.id) {
-                console.log("port already exist");
                 portExists = true;
               }
             });
@@ -1032,11 +1020,9 @@ RED.dnr = (function() {
       if (!nodes[i]['constraints'])
         continue;
 
-      console.log(nodes[i]['constraints']);
       var nConstraints = nodes[i].constraints;
       for (c in nConstraints){
         if (c !== 'link'){
-          console.log("In load constraints before adding them to GUI");
           addConstraintToGui(nConstraints[c]);
         }
       }
@@ -1049,12 +1035,9 @@ RED.dnr = (function() {
       if (!nodes[i]['privacy_labels'])
         continue;
 
-      console.log(nodes[i]['privacy_labels']);
-
       var nPrivacyLabels = nodes[i].privacy_labels;
       for (c in nPrivacyLabels){
         if (c !== 'link'){
-          console.log("In load privacy_labels before adding them to GUI");
           addPrivacyLabelToGui(nPrivacyLabels[c]);
         }
       }
@@ -1097,9 +1080,6 @@ RED.dnr = (function() {
       .style({"font-style": "italic", "font-size": 12});
 
     for (var j = 0; j < nodeConstraints.length; j++){
-
-      console.log("In the redraw function, node contrsiants are");
-      console.log(nodeConstraints);
 
       var constraintData = nodeConstraints[j];
       var fill = constraintData.fill || "black";
@@ -1161,9 +1141,6 @@ RED.dnr = (function() {
       .style({"font-style": "italic", "font-size": 12});
 
     for (var j = 0; j < nodePrivacyLabels.length; j++){
-
-      console.log("In the redraw function, node contrsiants are");
-      console.log(nodePrivacyLabels);
 
       var privacyLabelData = nodePrivacyLabels[j];
       var fill = privacyLabelData.fill || "black";
@@ -1414,8 +1391,6 @@ RED.sidebar.devices = (function() {
 
       if (topic === 'devices/heartbeat'){
         var ctx = JSON.stringify(device.context)
-        console.log("context from heart beat is");
-        console.log(ctx);
         devices[device.id].context = device.context
         devices[device.id].lastSeen = device.lastSeen
         var lastSeenTime = new Date(device.lastSeen)
